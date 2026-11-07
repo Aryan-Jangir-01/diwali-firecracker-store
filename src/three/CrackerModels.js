@@ -604,13 +604,56 @@ export function createDiyaModel(x = 0, y = 0, z = 0, scale = 1.0) {
   light.position.set(0.32, 0.38, 0);
   diyaGroup.add(light);
 
+  let isLit = true;
+
   function update(time) {
+    if (!isLit) {
+      flame.visible = false;
+      light.intensity = 0;
+      return;
+    }
+    flame.visible = true;
     const flicker = Math.sin(time * 12 + x) * 0.15 + Math.cos(time * 24 + z) * 0.1;
     flame.scale.set(1 + flicker * 0.5, 1 + flicker, 1 + flicker * 0.5);
     light.intensity = 1.8 + flicker * 0.8;
   }
 
-  return { mesh: diyaGroup, update };
+  function toggle() {
+    isLit = !isLit;
+    if (!isLit) {
+      flame.visible = false;
+      light.intensity = 0;
+    }
+    return isLit;
+  }
+
+  function setLit(val) {
+    isLit = !!val;
+    if (!isLit) {
+      flame.visible = false;
+      light.intensity = 0;
+    }
+  }
+
+  const diyaObj = {
+    mesh: diyaGroup,
+    flame,
+    light,
+    update,
+    toggle,
+    setLit,
+    get isLit() {
+      return isLit;
+    },
+    position: new THREE.Vector3(x, y + 0.32, z),
+  };
+
+  diyaGroup.userData = { isDiya: true, diyaObj };
+  bowl.userData = { isDiya: true, diyaObj };
+  spout.userData = { isDiya: true, diyaObj };
+  flame.userData = { isDiya: true, diyaObj };
+
+  return diyaObj;
 }
 
 // -------------------------------------------------------------

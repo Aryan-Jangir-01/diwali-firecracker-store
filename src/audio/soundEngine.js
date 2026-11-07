@@ -450,6 +450,25 @@ class SoundEngine {
     src.stop(now + 2.8);
   }
 
+  // Rapid micro-crackle for interactive sparkler wand drawing
+  playSparklerTick() {
+    if (this.muted) return;
+    this.ensureContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(3200 + Math.random() * 2800, now);
+    osc.frequency.exponentialRampToValueAtTime(800, now + 0.04);
+    g.gain.setValueAtTime(0.04, now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+    osc.connect(g);
+    g.connect(this.masterGain);
+    osc.start(now);
+    osc.stop(now + 0.045);
+  }
+
   // Serene Ambient Temple Bell chime
   playTempleBell() {
     if (this.muted) return;
